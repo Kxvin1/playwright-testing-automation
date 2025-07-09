@@ -1,5 +1,8 @@
 # Hacker News Sorting Validation - Enhanced Implementation
 
+![Dashboard](https://i.imgur.com/konS0UR.png)
+
+
 ## Table of Contents
 
 1. [Technical Overview](#technical-overview)
