@@ -33,6 +33,24 @@ This project implements comprehensive validation of Hacker News article sorting 
 
 ## Quick Start
 
+### Prerequisites & Setup
+
+**First time setup - run these commands in order:**
+
+```bash
+# 1. Install Node.js dependencies
+npm install
+
+# 2. Install Playwright browser binaries (required for automation)
+npx playwright install
+```
+
+**Why both commands?**
+- `npm install` - Installs the JavaScript packages and project dependencies
+- `npx playwright install` - Downloads browser executables (~100MB per browser)
+
+**Note:** You need both commands after cloning the repository or deleting `node_modules`. The browser binaries are separate from the npm packages.
+
 ### Essential Workflow
 
 ```bash
