@@ -1,0 +1,256 @@
+[
+  {
+    "timestamp": "2025-07-09T16:17:29.876Z",
+    "testRun": {
+      "id": "run_1752077849876",
+      "browser": "chromium",
+      "viewport": "Desktop",
+      "executionTime": 7125
+    },
+    "functional": {
+      "sortingAccuracy": {
+        "value": 92.93,
+        "threshold": 80,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "dataExtraction": {
+        "value": 100,
+        "expectedValue": 100,
+        "completeness": 100,
+        "status": "PASS"
+      },
+      "errorRate": {
+        "value": 0,
+        "threshold": 5,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "consistencyScore": {
+        "value": 100,
+        "threshold": 80,
+        "status": "PASS"
+      }
+    },
+    "performance": {
+      "loadTime": {
+        "value": 659,
+        "threshold": 5000,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "performanceScore": {
+        "value": 86.82,
+        "threshold": 75,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "resourceUsage": {
+        "memoryUsage": 39.589637756347656,
+        "status": "PASS"
+      }
+    },
+    "security": {
+      "securityScore": {
+        "value": 95,
+        "threshold": 95,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "vulnerabilities": {
+        "count": 0,
+        "severity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "status": "PASS"
+      },
+      "complianceScore": {
+        "value": 95,
+        "threshold": 95,
+        "status": "PASS"
+      }
+    },
+    "dataQuality": {
+      "completeness": {
+        "value": 100,
+        "threshold": 90,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "accuracy": {
+        "value": 100,
+        "threshold": 95,
+        "status": "PASS"
+      },
+      "consistency": {
+        "value": 100,
+        "threshold": 90,
+        "status": "PASS"
+      }
+    },
+    "apiQuality": {
+      "availability": {
+        "value": 100,
+        "threshold": 99,
+        "status": "PASS"
+      },
+      "performance": {
+        "value": 100,
+        "threshold": 80,
+        "status": "PASS"
+      },
+      "dataIntegrity": {
+        "value": 100,
+        "threshold": 95,
+        "status": "PASS"
+      },
+      "contractCompliance": {
+        "value": 100,
+        "threshold": 95,
+        "status": "PASS"
+      }
+    },
+    "overall": {
+      "value": 96,
+      "threshold": 85,
+      "status": "PASS",
+      "grade": "A+",
+      "components": {
+        "functional": 97,
+        "performance": 87,
+        "security": 95,
+        "dataQuality": 100,
+        "apiQuality": 100
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-09T16:19:00.216Z",
+    "testRun": {
+      "id": "run_1752077940216",
+      "browser": "chromium",
+      "viewport": "Tablet",
+      "executionTime": 7223
+    },
+    "functional": {
+      "sortingAccuracy": {
+        "value": 89.9,
+        "threshold": 80,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "dataExtraction": {
+        "value": 100,
+        "expectedValue": 100,
+        "completeness": 100,
+        "status": "PASS"
+      },
+      "errorRate": {
+        "value": 0,
+        "threshold": 5,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "consistencyScore": {
+        "value": 100,
+        "threshold": 80,
+        "status": "PASS"
+      }
+    },
+    "performance": {
+      "loadTime": {
+        "value": 657,
+        "threshold": 5000,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "performanceScore": {
+        "value": 86.86,
+        "threshold": 75,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "resourceUsage": {
+        "memoryUsage": 47.13001251220703,
+        "status": "PASS"
+      }
+    },
+    "security": {
+      "securityScore": {
+        "value": 95,
+        "threshold": 95,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "vulnerabilities": {
+        "count": 0,
+        "severity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "status": "PASS"
+      },
+      "complianceScore": {
+        "value": 95,
+        "threshold": 95,
+        "status": "PASS"
+      }
+    },
+    "dataQuality": {
+      "completeness": {
+        "value": 100,
+        "threshold": 90,
+        "status": "PASS",
+        "trend": "stable"
+      },
+      "accuracy": {
+        "value": 100,
+        "threshold": 95,
+        "status": "PASS"
+      },
+      "consistency": {
+        "value": 100,
+        "threshold": 90,
+        "status": "PASS"
+      }
+    },
+    "apiQuality": {
+      "availability": {
+        "value": 100,
+        "threshold": 99,
+        "status": "PASS"
+      },
+      "performance": {
+        "value": 100,
+        "threshold": 80,
+        "status": "PASS"
+      },
+      "dataIntegrity": {
+        "value": 100,
+        "threshold": 95,
+        "status": "PASS"
+      },
+      "contractCompliance": {
+        "value": 100,
+        "threshold": 95,
+        "status": "PASS"
+      }
+    },
+    "overall": {
+      "value": 95,
+      "threshold": 85,
+      "status": "PASS",
+      "grade": "A+",
+      "components": {
+        "functional": 96,
+        "performance": 87,
+        "security": 95,
+        "dataQuality": 100,
+        "apiQuality": 100
+      }
+    }
+  }
+]

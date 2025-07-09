@@ -1,0 +1,32 @@
+{
+  "name": "playwright-automation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js",
+    "test:headless": "HEADLESS=true node index.js",
+    "test:slow": "SLOWMO=500 node index.js",
+    "test:api": "node -e \"const HNApiTester = require('./tests/api/hnApiTests'); const tester = new HNApiTester(); tester.runAllTests().then(console.log);\"",
+    "test:security": "node -e \"const SecurityTester = require('./tests/security/securityTests'); const tester = new SecurityTester(); tester.runSecurityTests().then(console.log);\"",
+    "validate": "node -e \"console.log('Node.js version:', process.version); console.log('Platform:', process.platform);\"",
+    "clean": "rm -rf reports/*",
+    "report": "node scripts/open-report.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.3.0",
+    "moment": "^2.30.1",
+    "playwright": "^1.39.0",
+    "playwright-html-reporter": "^0.1.11"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.39.0",
+    "@types/node": "^20.8.9"
+  }
+}

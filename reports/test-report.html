@@ -1,0 +1,1783 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker News Sorting Validation Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            background: #0b0b30;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3e34eb 0%, #6779eb 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+        
+        .status-pass { background: #0df2cc; color: #151b26; }
+        .status-fail { background: #f8d7da; color: #721c24; }
+        .status-warn { background: #f4bdec; color: #151b26; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #160e8c 0%, #1a1092 100%);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border-left: 4px solid #0df2cc;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(13, 242, 204, 0.2), transparent);
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+        }
+        
+        .card h3 {
+            color: #0df2cc;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            background: rgba(11, 11, 48, 0.4);
+            border-radius: 8px;
+            border-left: 2px solid rgba(13, 242, 204, 0.3);
+        }
+        
+        .metric:last-child {
+            margin-bottom: 0;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: #0df2cc;
+        }
+        
+        .chart-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: #0b0b30;
+            border-radius: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+        
+        .progress-fill.warning {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+        }
+        
+        .progress-fill.danger {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+        }
+        
+        .anomaly-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(13, 242, 204, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(11, 11, 48, 0.3);
+        }
+        
+        .anomaly-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #dc3545;
+            background: #0b0b30;
+        }
+        
+        .anomaly-critical { border-left-color: #dc3545; }
+        .anomaly-warning { border-left-color: #ffc107; }
+        .anomaly-info { border-left-color: #17a2b8; }
+        
+        .timestamp-distribution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .time-range {
+            text-align: center;
+            padding: 15px;
+            background: #0b0b30;
+            border-radius: 8px;
+            border: 2px solid #333;
+        }
+        
+        .time-range.active {
+            border-color: #0df2cc;
+            background: #160e8c;
+        }
+        
+        .time-count {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .recommendations {
+            background: linear-gradient(135deg, #1a1054 0%, #1e1359 100%);
+            border-radius: 12px;
+            padding: 35px;
+            margin: 40px 0;
+            border-left: 4px solid #f4bdec;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            position: relative;
+        }
+        
+        .recommendations:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(244, 189, 236, 0.3), transparent);
+        }
+        
+        .recommendation {
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #0df2cc;
+            background: rgba(11, 11, 48, 0.4);
+        }
+        
+        .recommendation.critical { 
+            background: rgba(220, 53, 69, 0.15); 
+            border-left-color: #dc3545; 
+        }
+        
+        .recommendation.warning { 
+            background: rgba(255, 193, 7, 0.15); 
+            border-left-color: #ffc107; 
+        }
+        
+        .recommendation.success { 
+            background: rgba(13, 242, 204, 0.15); 
+            border-left-color: #0df2cc; 
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #ffffff;
+            border-top: 1px solid rgba(13, 242, 204, 0.3);
+        }
+        
+        .details-section {
+            background: linear-gradient(135deg, #1a1054 0%, #1e1359 100%);
+            border-radius: 12px;
+            padding: 35px;
+            margin: 40px 0;
+            border-left: 4px solid #0df2cc;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            position: relative;
+        }
+        
+        .details-section:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(13, 242, 204, 0.3), transparent);
+        }
+        
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            background: #160e8c;
+            border: none;
+            width: 100%;
+            text-align: left;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        .collapsible:hover {
+            background: #1a1054;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background: #160e8c;
+        }
+        
+        .article-preview {
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            background: #0b0b30;
+        }
+        
+        .article-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .article-item:last-child {
+            border-bottom: none;
+        }
+        
+        .articles-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 1.1em;
+        }
+        
+        .articles-table th,
+        .articles-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(13, 242, 204, 0.15);
+        }
+        
+        .articles-table th {
+            background-color: #0b0b30;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .articles-table tr:hover {
+            background-color: #1a1054;
+        }
+        
+        .articles-table .position {
+            width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: #0df2cc;
+        }
+        
+        .articles-table .title {
+            max-width: 400px;
+        }
+        
+        .articles-table .title a {
+            color: #0df2cc;
+            text-decoration: none;
+        }
+        
+        .articles-table .title a:hover {
+            color: #6779eb;
+            text-decoration: underline;
+        }
+        
+        .articles-table .author {
+            color: #ffffff;
+            font-size: 0.95em;
+        }
+        
+        .articles-table .score {
+            text-align: center;
+            width: 60px;
+            font-weight: 600;
+        }
+        
+        .articles-table .timestamp {
+            color: #ffffff;
+            font-size: 0.95em;
+            width: 140px;
+        }
+        
+        .articles-section {
+            margin: 40px 0;
+        }
+        
+        .articles-count {
+            color: #0df2cc;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .articles-table {
+                font-size: 1em;
+            }
+            
+            .articles-table .title {
+                max-width: 250px;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Playwright Testing Report</h1>
+            <div class="subtitle">Cross-Browser Testing & Quality Assurance Report</div>
+            <div style="margin-top: 20px;">
+                <span class="status-badge status-pass">
+                    PASS
+                </span>
+                <div style="margin-top: 10px; font-size: 0.9em;">
+                    Generated: 2025-07-09 9:19:00 AM | 
+                    Browsers: chromium, firefox | 
+                       Viewports: 3 | 
+                       Tests: 6
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="card" style="grid-column: 1 / -1; margin-bottom: 30px;">
+            <h3>🎯 Quality Score Dashboard</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 3em; font-weight: bold; color: #0df2cc;">
+                        95
+                    </div>
+                    <div style="font-size: 1.2em; color: #ffffff;">Overall Quality</div>
+                    <div style="font-size: 1.5em; font-weight: bold; color: #0df2cc;">
+                        Grade A
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex-grow: 1; max-width: 600px;">
+                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">95</div>
+                        <div style="font-size: 1em; color: #ffffff;">Functional</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">86</div>
+                        <div style="font-size: 1em; color: #ffffff;">Performance</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">95</div>
+                        <div style="font-size: 1em; color: #ffffff;">Security</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">100</div>
+                        <div style="font-size: 1em; color: #ffffff;">Data Quality</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">100</div>
+                        <div style="font-size: 1em; color: #ffffff;">API Quality</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
+                        <div style="font-size: 1.2em; font-weight: bold; color: #0df2cc;">
+                            PASS
+                        </div>
+                        <div style="font-size: 1em; color: #ffffff;">Status</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        
+        <div class="card" style="grid-column: 1 / -1; margin-bottom: 30px;">
+            <h3>🌐 Cross-Browser Test Summary</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                
+                    <div style="text-align: center; padding: 20px; background: #0b0b30; border-radius: 8px; border: 2px solid #4285f4;">
+                        <h4 style="color: #4285f4; text-transform: uppercase; margin-bottom: 15px;">chromium</h4>
+                        <div style="font-size: 2em; font-weight: bold; color: #4285f4;">
+                            662ms
+                        </div>
+                        <div style="color: #ffffff; margin-bottom: 10px;">Average Load Time</div>
+                        <div style="font-size: 1.5em; font-weight: bold; color: #4285f4;">
+                            88.55%
+                        </div>
+                        <div style="color: #ffffff;">Sorting Accuracy</div>
+                    </div>
+                
+                    <div style="text-align: center; padding: 20px; background: #0b0b30; border-radius: 8px; border: 2px solid #ff9500;">
+                        <h4 style="color: #ff9500; text-transform: uppercase; margin-bottom: 15px;">firefox</h4>
+                        <div style="font-size: 2em; font-weight: bold; color: #ff9500;">
+                            1242ms
+                        </div>
+                        <div style="color: #ffffff; margin-bottom: 10px;">Average Load Time</div>
+                        <div style="font-size: 1.5em; font-weight: bold; color: #ff9500;">
+                            53.20%
+                        </div>
+                        <div style="color: #ffffff;">Sorting Accuracy</div>
+                    </div>
+                
+            </div>
+        </div>
+        
+
+        <div class="grid">
+            <div class="card">
+                <h3>📊 Sorting Analysis</h3>
+                <div class="metric">
+                    <span>Accuracy</span>
+                    <span class="metric-value">87.88%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill warning" 
+                         style="width: 87.88%"></div>
+                </div>
+                <div class="metric">
+                    <span>Correct Pairs</span>
+                    <span class="metric-value">87</span>
+                </div>
+                <div class="metric">
+                    <span>Incorrect Pairs</span>
+                    <span class="metric-value">12</span>
+                </div>
+                <div class="metric">
+                    <span>Error Rate</span>
+                    <span class="metric-value">12.12%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🔍 Data Quality</h3>
+                <div class="metric">
+                    <span>Completeness</span>
+                    <span class="metric-value">100.0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill " 
+                         style="width: 100%"></div>
+                </div>
+                <div class="metric">
+                    <span>Missing Titles</span>
+                    <span class="metric-value">0</span>
+                </div>
+                <div class="metric">
+                    <span>Missing Timestamps</span>
+                    <span class="metric-value">0</span>
+                </div>
+                <div class="metric">
+                    <span>Total Issues</span>
+                    <span class="metric-value">0</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚡ Performance</h3>
+                <div class="metric">
+                    <span>Page Load Time</span>
+                    <span class="metric-value">680ms</span>
+                </div>
+                <div class="metric">
+                    <span>DOM Content Loaded</span>
+                    <span class="metric-value">0ms</span>
+                </div>
+                <div class="metric">
+                    <span>Total Size</span>
+                    <span class="metric-value">N/A</span>
+                </div>
+                <div class="metric">
+                    <span>Viewport</span>
+                    <span class="metric-value">Desktop</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚠️ Anomalies</h3>
+                <div class="metric">
+                    <span>Total Found</span>
+                    <span class="metric-value">64</span>
+                </div>
+                <div class="metric">
+                    <span>Critical Issues</span>
+                    <span class="metric-value">0</span>
+                </div>
+                <div class="metric">
+                    <span>Consecutive Errors</span>
+                    <span class="metric-value">0</span>
+                </div>
+                <div class="metric">
+                    <span>Large Time Jumps</span>
+                    <span class="metric-value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📅 Timestamp Distribution</h3>
+            <div class="timestamp-distribution">
+                <div class="time-range active">
+                    <div class="time-count">100</div>
+                    <div>Last Hour</div>
+                </div>
+                <div class="time-range ">
+                    <div class="time-count">0</div>
+                    <div>Last 6 Hours</div>
+                </div>
+                <div class="time-range ">
+                    <div class="time-count">0</div>
+                    <div>Last 24 Hours</div>
+                </div>
+                <div class="time-range ">
+                    <div class="time-count">0</div>
+                    <div>Last Week</div>
+                </div>
+                <div class="time-range ">
+                    <div class="time-count">0</div>
+                    <div>Older</div>
+                </div>
+            </div>
+            <div class="metric">
+                <span>Average Time Between Articles</span>
+                <span class="metric-value">0.6 minutes</span>
+            </div>
+        </div>
+
+        <div class="articles-section">
+            <div class="card">
+                <h3>📰 Sorted Articles (by Timestamp)</h3>
+                <div class="articles-count">
+                    Showing 100 articles sorted by newest first
+                </div>
+                
+                    <table class="articles-table">
+                        <thead>
+                            <tr>
+                                <th class="position">#</th>
+                                <th class="title">Title</th>
+                                <th class="author">Author</th>
+                                <th class="score">Score</th>
+                                <th class="timestamp">Posted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                                <tr>
+                                    <td class="position">1</td>
+                                    <td class="title">
+                                        <a href="https://fletcher456.github.io/j-incunabulum-homage/" target="_blank" rel="noopener noreferrer">
+                                            Show HN: Mini J Interpreter in Rust, vibe coded
+                                        </a>
+                                    </td>
+                                    <td class="author">alasarmas</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">0 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">2</td>
+                                    <td class="title">
+                                        <a href="https://www.cnbc.com/2025/06/29/nvidia-insiders-1-billion-stock-sales.html" target="_blank" rel="noopener noreferrer">
+                                            Nvidia insiders $1B stock sales
+                                        </a>
+                                    </td>
+                                    <td class="author">cratermoon</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">1 minute ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">3</td>
+                                    <td class="title">
+                                        <a href="https://c9x.me/yacc/" target="_blank" rel="noopener noreferrer">
+                                            Miniyacc – A Lightweight Yacc for C
+                                        </a>
+                                    </td>
+                                    <td class="author">alabhyajindal</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">1 minute ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">4</td>
+                                    <td class="title">
+                                        <a href="https://github.com/YaLTeR/niri" target="_blank" rel="noopener noreferrer">
+                                            Niri: A scrollable-tiling Wayland compositor.
+                                        </a>
+                                    </td>
+                                    <td class="author">marcodiego</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">5 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">5</td>
+                                    <td class="title">
+                                        <a href="https://www.beam.cloud/blog/agentic-apps" target="_blank" rel="noopener noreferrer">
+                                            The Architecture Behind Lovable and Bolt
+                                        </a>
+                                    </td>
+                                    <td class="author">Mernit</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">5 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">6</td>
+                                    <td class="title">
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            No title
+                                        </a>
+                                    </td>
+                                    <td class="author">Bender</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">5 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">7</td>
+                                    <td class="title">
+                                        <a href="https://www.nbcnews.com/news/us-news/army-will-end-ceremonial-horse-programs-adopt-animals-rcna217652" target="_blank" rel="noopener noreferrer">
+                                            US Army will end most of its horse programs and adopt out the animals
+                                        </a>
+                                    </td>
+                                    <td class="author">geox</td>
+                                    <td class="score">3</td>
+                                    <td class="timestamp">6 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">8</td>
+                                    <td class="title">
+                                        <a href="https://www.securityweek.com/the-wild-wild-west-of-agentic-ai-an-attack-surface-cisos-cant-afford-to-ignore/" target="_blank" rel="noopener noreferrer">
+                                            The Wild West of Agentic AI – An Attack Surface CISOs Can't Afford to Ignore
+                                        </a>
+                                    </td>
+                                    <td class="author">Bender</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">6 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">9</td>
+                                    <td class="title">
+                                        <a href="https://www.securityweek.com/exploits-technical-details-released-for-citrixbleed2-vulnerability/" target="_blank" rel="noopener noreferrer">
+                                            Exploits, Technical Details Released for CitrixBleed2 Vulnerability
+                                        </a>
+                                    </td>
+                                    <td class="author">Bender</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">6 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">10</td>
+                                    <td class="title">
+                                        <a href="https://techcrunch.com/2025/07/08/rivian-spinoff-also-raises-another-200m-to-build-e-bikes-and-more/" target="_blank" rel="noopener noreferrer">
+                                            Rivian spinoff Also raises another $200M
+                                        </a>
+                                    </td>
+                                    <td class="author">hasheddan</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">8 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">11</td>
+                                    <td class="title">
+                                        <a href="https://www.theverge.com/phones/701076/samsung-galaxy-z-fold-flip-7-fe-hands-on" target="_blank" rel="noopener noreferrer">
+                                            Galaxy Z Fold 7: Samsung made the foldables we've been asking for
+                                        </a>
+                                    </td>
+                                    <td class="author">yabatopia</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">8 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">12</td>
+                                    <td class="title">
+                                        <a href="https://kaiden.chat" target="_blank" rel="noopener noreferrer">
+                                            Show HN: Kaiden – A chat-based health assistant you can talk to
+                                        </a>
+                                    </td>
+                                    <td class="author">falcon_</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">9 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">13</td>
+                                    <td class="title">
+                                        <a href="https://phys.org/news/2025-06-rice-rebels-reveals-grain-brewing.html" target="_blank" rel="noopener noreferrer">
+                                            Rice rebels: Research reveals grain's brewing benefits
+                                        </a>
+                                    </td>
+                                    <td class="author">PaulHoule</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">10 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">14</td>
+                                    <td class="title">
+                                        <a href="https://www.cnbc.com/2025/07/09/linda-yaccarino-x-elon-musk.html" target="_blank" rel="noopener noreferrer">
+                                            Linda Yaccarino steps down as CEO of   X
+                                        </a>
+                                    </td>
+                                    <td class="author">thm</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">12 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">15</td>
+                                    <td class="title">
+                                        <a href="https://thenextgreatshow.com" target="_blank" rel="noopener noreferrer">
+                                            Show HN: The Next Great Show – Discover the next generation of television
+                                        </a>
+                                    </td>
+                                    <td class="author">arowe</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">12 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">16</td>
+                                    <td class="title">
+                                        <a href="https://developers.googleblog.com/en/t5gemma/" target="_blank" rel="noopener noreferrer">
+                                            T5Gemma: A new collection of encoder-decoder Gemma models
+                                        </a>
+                                    </td>
+                                    <td class="author">meetpateltech</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">13 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">17</td>
+                                    <td class="title">
+                                        <a href="https://reka.ai/products/research" target="_blank" rel="noopener noreferrer">
+                                            Show HN: Reka Research – A SOTA research agent
+                                        </a>
+                                    </td>
+                                    <td class="author">donovanOng</td>
+                                    <td class="score">3</td>
+                                    <td class="timestamp">13 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">18</td>
+                                    <td class="title">
+                                        <a href="https://machinelearning.apple.com/research/scenescout" target="_blank" rel="noopener noreferrer">
+                                            Towards AI Agent-Driven Access to Street View Imagery for Blind Users
+                                        </a>
+                                    </td>
+                                    <td class="author">alwillis</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">16 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">19</td>
+                                    <td class="title">
+                                        <a href="https://apnews.com/article/nvidia-4-trillion-chipmaker-7947e86a7ee9a994b9f16c3c0779b74f" target="_blank" rel="noopener noreferrer">
+                                            Nvidia becomes the first company to reach $4T in value
+                                        </a>
+                                    </td>
+                                    <td class="author">gfortaine</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">22 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">20</td>
+                                    <td class="title">
+                                        <a href="https://www.youtube.com/watch?v=zycRrVS3NLc" target="_blank" rel="noopener noreferrer">
+                                            Explaining assembly by playing SHENZHEN I/O [video]
+                                        </a>
+                                    </td>
+                                    <td class="author">aragonite</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">22 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">21</td>
+                                    <td class="title">
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            No title
+                                        </a>
+                                    </td>
+                                    <td class="author">terabaapmrtv</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">24 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">22</td>
+                                    <td class="title">
+                                        <a href="https://asteroid.ai/blog/graph-powered-browser-agents" target="_blank" rel="noopener noreferrer">
+                                            Browser Agents Love Graphs
+                                        </a>
+                                    </td>
+                                    <td class="author">epi3</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">24 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">23</td>
+                                    <td class="title">
+                                        <a href="https://eamag.me/2025/NeoBERT-Fine-Tuning" target="_blank" rel="noopener noreferrer">
+                                            Fine-tuning NeoBERT for a multi-class text classification
+                                        </a>
+                                    </td>
+                                    <td class="author">eamag</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">25 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">24</td>
+                                    <td class="title">
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            No title
+                                        </a>
+                                    </td>
+                                    <td class="author">isntThatSth</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">25 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">25</td>
+                                    <td class="title">
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            No title
+                                        </a>
+                                    </td>
+                                    <td class="author">absoluteunit1</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">25 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">26</td>
+                                    <td class="title">
+                                        <a href="https://www.createmybanner.com/" target="_blank" rel="noopener noreferrer">
+                                            Show HN: CreateMyBanner – AI-generated banners for social media
+                                        </a>
+                                    </td>
+                                    <td class="author">ddoemonn</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">26 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">27</td>
+                                    <td class="title">
+                                        <a href="https://www.lawfaremedia.org/article/retconning--russiagate" target="_blank" rel="noopener noreferrer">
+                                            Retconning 'Russiagate': The CIA director encourages the rewriting of history
+                                        </a>
+                                    </td>
+                                    <td class="author">nabla9</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">26 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">28</td>
+                                    <td class="title">
+                                        <a href="https://newsroom.ibm.com/2025-07-08-ibm-power11-raises-the-bar-for-enterprise-it" target="_blank" rel="noopener noreferrer">
+                                            IBM Power11 Raises the Bar for Enterprise IT
+                                        </a>
+                                    </td>
+                                    <td class="author">doener</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">27 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">29</td>
+                                    <td class="title">
+                                        <a href="https://comet.perplexity.ai/" target="_blank" rel="noopener noreferrer">
+                                            Comet Browser by Perplexity
+                                        </a>
+                                    </td>
+                                    <td class="author">RobinL</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">27 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">30</td>
+                                    <td class="title">
+                                        <a href="https://martinfowler.com/articles/exploring-gen-ai/i-still-care-about-the-code.html" target="_blank" rel="noopener noreferrer">
+                                            I still care about the code
+                                        </a>
+                                    </td>
+                                    <td class="author">zdw</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">27 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">31</td>
+                                    <td class="title">
+                                        <a href="https://web.stanford.edu/dept/SUL/sites/mac/primary/docs/bom/anthrophilic.html" target="_blank" rel="noopener noreferrer">
+                                            Design Considerations for an Anthropophilic Computer
+                                        </a>
+                                    </td>
+                                    <td class="author">chaosmachine</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">30 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">32</td>
+                                    <td class="title">
+                                        <a href="https://www.youtube.com/watch?v=sWZRQsejtfA" target="_blank" rel="noopener noreferrer">
+                                            These People Believe They Made AI Sentient [video]
+                                        </a>
+                                    </td>
+                                    <td class="author">jackdoe</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">31 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">33</td>
+                                    <td class="title">
+                                        <a href="https://blog.abolyn.com/p/how-and-why-to-be-a-good-customer" target="_blank" rel="noopener noreferrer">
+                                            How (and why) to be a good customer
+                                        </a>
+                                    </td>
+                                    <td class="author">aranibatta</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">32 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">34</td>
+                                    <td class="title">
+                                        <a href="https://arxiv.org/abs/2505.19896" target="_blank" rel="noopener noreferrer">
+                                            Large Language Models as Autonomous Spacecraft Operators in Kerbal Space Program
+                                        </a>
+                                    </td>
+                                    <td class="author">Bluestein</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">33 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">35</td>
+                                    <td class="title">
+                                        <a href="https://dfarq.homeip.net/monorail-the-pioneering-999-pc-from-1996/" target="_blank" rel="noopener noreferrer">
+                                            Monorail: Pioneering $999 PCs from 1996
+                                        </a>
+                                    </td>
+                                    <td class="author">zdw</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">36 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">36</td>
+                                    <td class="title">
+                                        <a href="https://www.bbc.co.uk/news/articles/cx2gy3j9xq6o" target="_blank" rel="noopener noreferrer">
+                                            Linda Yaccarino departs as boss of Musk's X
+                                        </a>
+                                    </td>
+                                    <td class="author">Angostura</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">37 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">37</td>
+                                    <td class="title">
+                                        <a href="https://www.servethehome.com/ibm-power11-launched-with-up-to-2048-threads-and-ddimm-support/" target="_blank" rel="noopener noreferrer">
+                                            IBM Power11 Launched with Up to 2048 Threads and Ddimm Support
+                                        </a>
+                                    </td>
+                                    <td class="author">rbanffy</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">40 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">38</td>
+                                    <td class="title">
+                                        <a href="https://www.popularmechanics.com/science/a65299485/physicists-find-ghost-haunting-most-famous-particle-accelerator/" target="_blank" rel="noopener noreferrer">
+                                            Physicists Found the Ghost Haunting the Most Famous Particle Accelerator
+                                        </a>
+                                    </td>
+                                    <td class="author">Bluestein</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">41 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">39</td>
+                                    <td class="title">
+                                        <a href="https://www.sciencealert.com/surprise-hair-loss-breakthrough-dna-sugar-gel-triggers-robust-regrowth" target="_blank" rel="noopener noreferrer">
+                                            Surprise Hair Loss Breakthrough: DNA Sugar Gel Triggers Robust Regrowth
+                                        </a>
+                                    </td>
+                                    <td class="author">amelius</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">43 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">40</td>
+                                    <td class="title">
+                                        <a href="https://github.com/ni5arga/pastelpaste" target="_blank" rel="noopener noreferrer">
+                                            Show HN: PastelPaste – A Minimal and Modern Pastebin Written in Rust
+                                        </a>
+                                    </td>
+                                    <td class="author">ni5arga</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">44 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">41</td>
+                                    <td class="title">
+                                        <a href="https://mogg-brown.vercel.app/" target="_blank" rel="noopener noreferrer">
+                                            Show HN: Mogg
+                                        </a>
+                                    </td>
+                                    <td class="author">Looksmaxxer</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">46 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">42</td>
+                                    <td class="title">
+                                        <a href="https://spectrum.ieee.org/nuclear-waste-reprocessing-transmutation" target="_blank" rel="noopener noreferrer">
+                                            Nuclear Waste Reprocessing Gains Momentum in the U.S.
+                                        </a>
+                                    </td>
+                                    <td class="author">rbanffy</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">47 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">43</td>
+                                    <td class="title">
+                                        <a href="https://www.telegraph.co.uk/money/property/buying-selling/resentment-brewing-friendship-groups-bank-of-mum-dad/" target="_blank" rel="noopener noreferrer">
+                                            'Tactless': Brewing Resentments over Bank of Mum and Dad
+                                        </a>
+                                    </td>
+                                    <td class="author">llimos</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">48 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">44</td>
+                                    <td class="title">
+                                        <a href="https://medicalxpress.com/news/2025-06-smarter-accurate-disorders.html" target="_blank" rel="noopener noreferrer">
+                                            Stick-on monitor promises smarter, more accurate detection of sleep disorders
+                                        </a>
+                                    </td>
+                                    <td class="author">PaulHoule</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">48 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">45</td>
+                                    <td class="title">
+                                        <a href="https://github.com/Code-and-Sorts/PromptDrifter" target="_blank" rel="noopener noreferrer">
+                                            Show HN: PromptDrifter – Catch LLM prompt drift before it breaks prod
+                                        </a>
+                                    </td>
+                                    <td class="author">feynmanquest</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">49 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">46</td>
+                                    <td class="title">
+                                        <a href="https://abc7news.com/post/huge-pile-amazon-packages-fills-bay-area-womans-driveway-third-party-seller-uses-home-address-returns/17022284/" target="_blank" rel="noopener noreferrer">
+                                            'It's been hell': Amazon packages mistakenly sent to SJ woman's home
+                                        </a>
+                                    </td>
+                                    <td class="author">randycupertino</td>
+                                    <td class="score">3</td>
+                                    <td class="timestamp">50 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">47</td>
+                                    <td class="title">
+                                        <a href="https://www.nature.com/articles/s41538-025-00474-z" target="_blank" rel="noopener noreferrer">
+                                            A chemical language model for molecular taste prediction
+                                        </a>
+                                    </td>
+                                    <td class="author">yz-exodao</td>
+                                    <td class="score">2</td>
+                                    <td class="timestamp">51 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">48</td>
+                                    <td class="title">
+                                        <a href="https://www.nextplatform.com/2025/07/08/only-the-biggest-neoclouds-will-survive/" target="_blank" rel="noopener noreferrer">
+                                            Only the Biggest Neoclouds Will Survive
+                                        </a>
+                                    </td>
+                                    <td class="author">rbanffy</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">51 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">49</td>
+                                    <td class="title">
+                                        <a href="https://nano-quantum-game.netlify.app/" target="_blank" rel="noopener noreferrer">
+                                            Show HN: Combine Minesweeper and Nanogram Game
+                                        </a>
+                                    </td>
+                                    <td class="author">evrmgzm</td>
+                                    <td class="score">1</td>
+                                    <td class="timestamp">51 minutes ago</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="position">50</td>
+                                    <td class="title">
+                                        <a href="https://abc7news.com/post/pge-scam-utility-company-warns-aggressive-scammers-bay-area-more-2500-cases-year-heres-what-know/17025303/" target="_blank" rel="noopener noreferrer">
+                                            PG&E warns of aggressive scammers in Bay Area with more than 2,500 reports
+                                        </a>
+                                    </td>
+                                    <td class="author">randycupertino</td>
+                                    <td class="score">3</td>
+                                    <td class="timestamp">54 minutes ago</td>
+                                </tr>
+                            
+                        </tbody>
+                    </table>
+                    
+                        <div style="margin-top: 15px; color: #6c757d; font-size: 0.9em; text-align: center;">
+                            Showing first 50 of 100 articles
+                        </div>
+                    
+                
+            </div>
+        </div>
+
+        
+        <div class="details-section">
+            <h3>🌐 Cross-Browser Performance Analysis</h3>
+            <div class="grid" style="margin-bottom: 20px;">
+                
+                    <div class="card" style="border-left-color: #4285f4;">
+                        <h4 style="text-transform: uppercase; color: #4285f4;">chromium</h4>
+                        <div class="metric">
+                            <span>Avg Load Time</span>
+                            <span class="metric-value">662ms</span>
+                        </div>
+                        <div class="metric">
+                            <span>Load Range</span>
+                            <span class="metric-value">648-680ms</span>
+                        </div>
+                        <div class="metric">
+                            <span>Avg Accuracy</span>
+                            <span class="metric-value">88.55%</span>
+                        </div>
+                        <div class="metric">
+                            <span>Test Count</span>
+                            <span class="metric-value">3</span>
+                        </div>
+                    </div>
+                
+                    <div class="card" style="border-left-color: #ff9500;">
+                        <h4 style="text-transform: uppercase; color: #ff9500;">firefox</h4>
+                        <div class="metric">
+                            <span>Avg Load Time</span>
+                            <span class="metric-value">1242ms</span>
+                        </div>
+                        <div class="metric">
+                            <span>Load Range</span>
+                            <span class="metric-value">1221-1262ms</span>
+                        </div>
+                        <div class="metric">
+                            <span>Avg Accuracy</span>
+                            <span class="metric-value">53.20%</span>
+                        </div>
+                        <div class="metric">
+                            <span>Test Count</span>
+                            <span class="metric-value">3</span>
+                        </div>
+                    </div>
+                
+            </div>
+            
+            <div class="card">
+                <h4>📊 Cross-Browser Compatibility Summary</h4>
+                <div class="metric">
+                    <span>Browsers Tested</span>
+                    <span class="metric-value">2</span>
+                </div>
+                <div class="metric">
+                    <span>Viewports Tested</span>
+                    <span class="metric-value">3</span>
+                </div>
+                <div class="metric">
+                    <span>Success Rate</span>
+                    <span class="metric-value">100.0%</span>
+                </div>
+                <div class="metric">
+                    <span>Total Test Scenarios</span>
+                    <span class="metric-value">6</span>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        
+        <div class="details-section">
+            <h3>🔎 Detected Anomalies</h3>
+            <div class="anomaly-list">
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 2<br>
+                        Duplicate timestamp found: 2025-07-09 09:16
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 4<br>
+                        Duplicate timestamp found: 2025-07-09 09:12
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 5<br>
+                        Duplicate timestamp found: 2025-07-09 09:12
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 7<br>
+                        Duplicate timestamp found: 2025-07-09 09:11
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 8<br>
+                        Duplicate timestamp found: 2025-07-09 09:11
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 10<br>
+                        Duplicate timestamp found: 2025-07-09 09:09
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 14<br>
+                        Duplicate timestamp found: 2025-07-09 09:05
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 16<br>
+                        Duplicate timestamp found: 2025-07-09 09:04
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 19<br>
+                        Duplicate timestamp found: 2025-07-09 08:55
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 21<br>
+                        Duplicate timestamp found: 2025-07-09 08:53
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 23<br>
+                        Duplicate timestamp found: 2025-07-09 08:52
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 24<br>
+                        Duplicate timestamp found: 2025-07-09 08:52
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 26<br>
+                        Duplicate timestamp found: 2025-07-09 08:51
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 28<br>
+                        Duplicate timestamp found: 2025-07-09 08:50
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 29<br>
+                        Duplicate timestamp found: 2025-07-09 08:50
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 43<br>
+                        Duplicate timestamp found: 2025-07-09 08:29
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 47<br>
+                        Duplicate timestamp found: 2025-07-09 08:26
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 48<br>
+                        Duplicate timestamp found: 2025-07-09 08:26
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 51<br>
+                        Duplicate timestamp found: 2025-07-09 08:21
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 52<br>
+                        Duplicate timestamp found: 2025-07-09 08:21
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 54<br>
+                        Duplicate timestamp found: 2025-07-09 08:20
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 56<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 57<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 58<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 59<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 60<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 61<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 62<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 63<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 64<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 65<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 66<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 67<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 68<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 69<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 70<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 71<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 72<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 73<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 74<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 75<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 76<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 77<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 78<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 79<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 80<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 81<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 82<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 83<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 84<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 85<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 86<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 87<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 88<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 89<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 90<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 91<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 92<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 93<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 94<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 95<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 96<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 97<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+                    <div class="anomaly-item anomaly-warning">
+                        <strong>DUPLICATE TIMESTAMP</strong> at position 98<br>
+                        Duplicate timestamp found: 2025-07-09 08:17
+                        
+                    </div>
+                
+            </div>
+        </div>
+        
+
+        <div class="recommendations">
+            <h3>💡 Recommendations</h3>
+            
+                <div class="recommendation success">
+                    <strong>INFO:</strong> All tests passed successfully with excellent performance
+                </div>
+            
+        </div>
+
+        <div class="details-section">
+            <h3>📋 Test Configuration</h3>
+            <button class="collapsible" onclick="toggleCollapsible(this)">Show Technical Details</button>
+            <div class="collapsible-content">
+                <div class="metric">
+                    <span>Test Execution Time</span>
+                    <span class="metric-value">2025-07-09 9:19:00 AM</span>
+                </div>
+                <div class="metric">
+                    <span>Target URL</span>
+                    <span class="metric-value">https://news.ycombinator.com/newest</span>
+                </div>
+                <div class="metric">
+                    <span>Expected Articles</span>
+                    <span class="metric-value">100</span>
+                </div>
+                <div class="metric">
+                    <span>Browser Engine</span>
+                    <span class="metric-value">chromium, firefox</span>
+                </div>
+                <div class="metric">
+                    <span>Test Framework</span>
+                    <span class="metric-value">Playwright + Custom Validation</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Generated by Playwright Testing Suite</p>
+            <p>Comprehensive validation for production-ready quality assurance</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleCollapsible(element) {
+            const content = element.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+                element.textContent = element.textContent.replace("Hide", "Show");
+            } else {
+                content.style.display = "block";
+                element.textContent = element.textContent.replace("Show", "Hide");
+            }
+        }
+        
+        // Add smooth animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>
+    
