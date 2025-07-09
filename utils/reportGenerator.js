@@ -38,8 +38,8 @@ const generateHTMLReport = async (
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #ffffff;
-            background: #0b0b30;
+            color: #cccac2;
+            background: #1f2430;
             font-size: 16px;
         }
         
@@ -50,12 +50,13 @@ const generateHTMLReport = async (
         }
         
         .header {
-            background: linear-gradient(135deg, #3e34eb 0%, #6779eb 100%);
-            color: white;
+            background: linear-gradient(135deg, #1f2430 0%, #2a3441 100%);
+            color: #cccac2;
             padding: 40px 20px;
             border-radius: 10px;
             margin-bottom: 30px;
             text-align: center;
+            border: 2px solid #fecc66;
         }
         
         .header h1 {
@@ -78,9 +79,9 @@ const generateHTMLReport = async (
             margin: 5px;
         }
         
-        .status-pass { background: #0df2cc; color: #151b26; }
-        .status-fail { background: #f8d7da; color: #721c24; }
-        .status-warn { background: #f4bdec; color: #151b26; }
+        .status-pass { background: #fecc66; color: #1f2430; }
+        .status-fail { background: #ff6b6b; color: #cccac2; }
+        .status-warn { background: #ffa759; color: #1f2430; }
         
         .grid {
             display: grid;
@@ -96,11 +97,11 @@ const generateHTMLReport = async (
         }
         
         .card {
-            background: linear-gradient(135deg, #160e8c 0%, #1a1092 100%);
+            background: linear-gradient(135deg, #242b38 0%, #2a3441 100%);
             border-radius: 12px;
             padding: 30px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            border-left: 4px solid #0df2cc;
+            border-left: 4px solid #fecc66;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             position: relative;
             overflow: hidden;
@@ -113,7 +114,7 @@ const generateHTMLReport = async (
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(13, 242, 204, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(254, 204, 102, 0.2), transparent);
         }
         
         .card:hover {
@@ -122,7 +123,7 @@ const generateHTMLReport = async (
         }
         
         .card h3 {
-            color: #0df2cc;
+            color: #fecc66;
             margin-bottom: 15px;
             font-size: 1.6em;
         }
@@ -132,9 +133,9 @@ const generateHTMLReport = async (
             justify-content: space-between;
             margin-bottom: 15px;
             padding: 12px 16px;
-            background: rgba(11, 11, 48, 0.4);
+            background: rgba(31, 36, 48, 0.4);
             border-radius: 8px;
-            border-left: 2px solid rgba(13, 242, 204, 0.3);
+            border-left: 2px solid rgba(254, 204, 102, 0.3);
         }
         
         .metric:last-child {
@@ -143,20 +144,20 @@ const generateHTMLReport = async (
         
         .metric-value {
             font-weight: bold;
-            color: #0df2cc;
+            color: #fecc66;
         }
         
         .chart-container {
             margin: 20px 0;
             padding: 15px;
-            background: #0b0b30;
+            background: #1f2430;
             border-radius: 8px;
         }
         
         .progress-bar {
             width: 100%;
             height: 20px;
-            background: #e9ecef;
+            background: #505867;
             border-radius: 10px;
             overflow: hidden;
             margin: 10px 0;
@@ -164,38 +165,38 @@ const generateHTMLReport = async (
         
         .progress-fill {
             height: 100%;
-            background: linear-gradient(45deg, #28a745, #20c997);
+            background: linear-gradient(45deg, #fecc66, #ffd89b);
             transition: width 0.3s ease;
         }
         
         .progress-fill.warning {
-            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            background: linear-gradient(45deg, #ffa759, #ff8a65);
         }
         
         .progress-fill.danger {
-            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
         }
         
         .anomaly-list {
             max-height: 300px;
             overflow-y: auto;
-            border: 1px solid rgba(13, 242, 204, 0.2);
+            border: 1px solid rgba(254, 204, 102, 0.2);
             border-radius: 8px;
             padding: 15px;
-            background: rgba(11, 11, 48, 0.3);
+            background: rgba(31, 36, 48, 0.3);
         }
         
         .anomaly-item {
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 5px;
-            border-left: 3px solid #dc3545;
-            background: #0b0b30;
+            border-left: 3px solid #ff6b6b;
+            background: #1f2430;
         }
         
-        .anomaly-critical { border-left-color: #dc3545; }
-        .anomaly-warning { border-left-color: #ffc107; }
-        .anomaly-info { border-left-color: #17a2b8; }
+        .anomaly-critical { border-left-color: #ff6b6b; }
+        .anomaly-warning { border-left-color: #ffa759; }
+        .anomaly-info { border-left-color: #4fd1c7; }
         
         .timestamp-distribution {
             display: grid;
@@ -207,28 +208,28 @@ const generateHTMLReport = async (
         .time-range {
             text-align: center;
             padding: 15px;
-            background: #0b0b30;
+            background: #1f2430;
             border-radius: 8px;
-            border: 2px solid #333;
+            border: 2px solid #505867;
         }
         
         .time-range.active {
-            border-color: #0df2cc;
-            background: #160e8c;
+            border-color: #fecc66;
+            background: #242b38;
         }
         
         .time-count {
             font-size: 2em;
             font-weight: bold;
-            color: #667eea;
+            color: #fecc66;
         }
         
         .recommendations {
-            background: linear-gradient(135deg, #1a1054 0%, #1e1359 100%);
+            background: linear-gradient(135deg, #242b38 0%, #2a3441 100%);
             border-radius: 12px;
             padding: 35px;
             margin: 40px 0;
-            border-left: 4px solid #f4bdec;
+            border-left: 4px solid #ffa759;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             position: relative;
         }
@@ -240,46 +241,46 @@ const generateHTMLReport = async (
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(244, 189, 236, 0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 167, 89, 0.3), transparent);
         }
         
         .recommendation {
             padding: 16px;
             margin-bottom: 12px;
             border-radius: 8px;
-            border-left: 3px solid #0df2cc;
-            background: rgba(11, 11, 48, 0.4);
+            border-left: 3px solid #fecc66;
+            background: rgba(31, 36, 48, 0.4);
         }
         
         .recommendation.critical { 
-            background: rgba(220, 53, 69, 0.15); 
-            border-left-color: #dc3545; 
+            background: rgba(255, 107, 107, 0.15); 
+            border-left-color: #ff6b6b; 
         }
         
         .recommendation.warning { 
-            background: rgba(255, 193, 7, 0.15); 
-            border-left-color: #ffc107; 
+            background: rgba(255, 167, 89, 0.15); 
+            border-left-color: #ffa759; 
         }
         
         .recommendation.success { 
-            background: rgba(13, 242, 204, 0.15); 
-            border-left-color: #0df2cc; 
+            background: rgba(254, 204, 102, 0.15); 
+            border-left-color: #fecc66; 
         }
         
         .footer {
             text-align: center;
             margin-top: 40px;
             padding: 20px;
-            color: #ffffff;
-            border-top: 1px solid rgba(13, 242, 204, 0.3);
+            color: #707a8c;
+            border-top: 1px solid rgba(254, 204, 102, 0.3);
         }
         
         .details-section {
-            background: linear-gradient(135deg, #1a1054 0%, #1e1359 100%);
+            background: linear-gradient(135deg, #242b38 0%, #2a3441 100%);
             border-radius: 12px;
             padding: 35px;
             margin: 40px 0;
-            border-left: 4px solid #0df2cc;
+            border-left: 4px solid #fecc66;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             position: relative;
         }
@@ -291,47 +292,47 @@ const generateHTMLReport = async (
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(13, 242, 204, 0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(254, 204, 102, 0.3), transparent);
         }
         
         .collapsible {
             cursor: pointer;
             padding: 10px;
-            background: #160e8c;
+            background: #242b38;
             border: none;
             width: 100%;
             text-align: left;
             border-radius: 5px;
             margin-bottom: 10px;
             font-weight: bold;
-            color: #ffffff;
+            color: #cccac2;
         }
         
         .collapsible:hover {
-            background: #1a1054;
+            background: #2a3441;
         }
         
         .collapsible-content {
             display: none;
             padding: 15px;
-            border: 1px solid #333;
+            border: 1px solid #505867;
             border-radius: 5px;
-            background: #160e8c;
+            background: #242b38;
         }
         
         .article-preview {
             font-size: 0.9em;
             max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #333;
+            border: 1px solid #505867;
             border-radius: 5px;
             padding: 10px;
-            background: #0b0b30;
+            background: #1f2430;
         }
         
         .article-item {
             padding: 5px 0;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #505867;
         }
         
         .article-item:last-child {
@@ -349,24 +350,24 @@ const generateHTMLReport = async (
         .articles-table td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid rgba(13, 242, 204, 0.15);
+            border-bottom: 1px solid rgba(254, 204, 102, 0.15);
         }
         
         .articles-table th {
-            background-color: #0b0b30;
+            background-color: #1f2430;
             font-weight: 600;
-            color: #ffffff;
+            color: #cccac2;
         }
         
         .articles-table tr:hover {
-            background-color: #1a1054;
+            background-color: #242b38;
         }
         
         .articles-table .position {
             width: 60px;
             text-align: center;
             font-weight: 600;
-            color: #0df2cc;
+            color: #fecc66;
         }
         
         .articles-table .title {
@@ -374,17 +375,17 @@ const generateHTMLReport = async (
         }
         
         .articles-table .title a {
-            color: #0df2cc;
+            color: #fecc66;
             text-decoration: none;
         }
         
         .articles-table .title a:hover {
-            color: #6779eb;
+            color: #ffd89b;
             text-decoration: underline;
         }
         
         .articles-table .author {
-            color: #ffffff;
+            color: #707a8c;
             font-size: 0.95em;
         }
         
@@ -395,7 +396,7 @@ const generateHTMLReport = async (
         }
         
         .articles-table .timestamp {
-            color: #ffffff;
+            color: #707a8c;
             font-size: 0.95em;
             width: 140px;
         }
@@ -405,7 +406,7 @@ const generateHTMLReport = async (
         }
         
         .articles-count {
-            color: #0df2cc;
+            color: #fecc66;
             font-weight: 600;
             margin-bottom: 10px;
         }
@@ -467,64 +468,64 @@ const generateHTMLReport = async (
                 <div style="text-align: center;">
                     <div style="font-size: 3em; font-weight: bold; color: ${
                       qualityMetrics.overall.value >= 90
-                        ? "#0df2cc"
+                        ? "#fecc66"
                         : qualityMetrics.overall.value >= 80
-                        ? "#f4bdec"
-                        : "#dc3545"
+                        ? "#ffa759"
+                        : "#ff6b6b"
                     };">
                         ${qualityMetrics.overall.value}
                     </div>
-                    <div style="font-size: 1.2em; color: #ffffff;">Overall Quality</div>
+                    <div style="font-size: 1.2em; color: #cccac2;">Overall Quality</div>
                     <div style="font-size: 1.5em; font-weight: bold; color: ${
                       qualityMetrics.overall.value >= 90
-                        ? "#0df2cc"
+                        ? "#fecc66"
                         : qualityMetrics.overall.value >= 80
-                        ? "#f4bdec"
-                        : "#dc3545"
+                        ? "#ffa759"
+                        : "#ff6b6b"
                     };">
                         Grade ${qualityMetrics.overall.grade}
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex-grow: 1; max-width: 600px;">
-                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
-                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">${
+                    <div style="text-align: center; padding: 15px; background: #1f2430; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #fecc66;">${
                           qualityMetrics.overall.components.functional
                         }</div>
-                        <div style="font-size: 1em; color: #ffffff;">Functional</div>
+                        <div style="font-size: 1em; color: #cccac2;">Functional</div>
                     </div>
-                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
-                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">${
+                    <div style="text-align: center; padding: 15px; background: #1f2430; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #fecc66;">${
                           qualityMetrics.overall.components.performance
                         }</div>
-                        <div style="font-size: 1em; color: #ffffff;">Performance</div>
+                        <div style="font-size: 1em; color: #cccac2;">Performance</div>
                     </div>
-                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
-                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">${
+                    <div style="text-align: center; padding: 15px; background: #1f2430; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #fecc66;">${
                           qualityMetrics.overall.components.security
                         }</div>
-                        <div style="font-size: 1em; color: #ffffff;">Security</div>
+                        <div style="font-size: 1em; color: #cccac2;">Security</div>
                     </div>
-                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
-                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">${
+                    <div style="text-align: center; padding: 15px; background: #1f2430; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #fecc66;">${
                           qualityMetrics.overall.components.dataQuality
                         }</div>
-                        <div style="font-size: 1em; color: #ffffff;">Data Quality</div>
+                        <div style="font-size: 1em; color: #cccac2;">Data Quality</div>
                     </div>
-                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
-                        <div style="font-size: 1.8em; font-weight: bold; color: #0df2cc;">${
+                    <div style="text-align: center; padding: 15px; background: #1f2430; border-radius: 8px;">
+                        <div style="font-size: 1.8em; font-weight: bold; color: #fecc66;">${
                           qualityMetrics.overall.components.apiQuality
                         }</div>
-                        <div style="font-size: 1em; color: #ffffff;">API Quality</div>
+                        <div style="font-size: 1em; color: #cccac2;">API Quality</div>
                     </div>
-                    <div style="text-align: center; padding: 15px; background: #0b0b30; border-radius: 8px;">
+                    <div style="text-align: center; padding: 15px; background: #1f2430; border-radius: 8px;">
                         <div style="font-size: 1.2em; font-weight: bold; color: ${
                           qualityMetrics.overall.status === "PASS"
-                            ? "#0df2cc"
-                            : "#dc3545"
+                            ? "#fecc66"
+                            : "#ff6b6b"
                         };">
                             ${qualityMetrics.overall.status}
                         </div>
-                        <div style="font-size: 1em; color: #ffffff;">Status</div>
+                        <div style="font-size: 1em; color: #cccac2;">Status</div>
                     </div>
                 </div>
             </div>
@@ -543,40 +544,40 @@ const generateHTMLReport = async (
                 ${Object.entries(testResults.aggregatedData.browserPerformance)
                   .map(
                     ([browser, metrics]) => `
-                    <div style="text-align: center; padding: 20px; background: #0b0b30; border-radius: 8px; border: 2px solid ${
+                    <div style="text-align: center; padding: 20px; background: #1f2430; border-radius: 8px; border: 2px solid ${
                       browser === "chromium"
                         ? "#4285f4"
                         : browser === "firefox"
                         ? "#ff9500"
-                        : "#1b1b1b"
+                        : "#707a8c"
                     };">
                         <h4 style="color: ${
                           browser === "chromium"
                             ? "#4285f4"
                             : browser === "firefox"
                             ? "#ff9500"
-                            : "#1b1b1b"
+                            : "#707a8c"
                         }; text-transform: uppercase; margin-bottom: 15px;">${browser}</h4>
                         <div style="font-size: 2em; font-weight: bold; color: ${
                           browser === "chromium"
                             ? "#4285f4"
                             : browser === "firefox"
                             ? "#ff9500"
-                            : "#1b1b1b"
+                            : "#707a8c"
                         };">
                             ${metrics.avgLoadTime}ms
                         </div>
-                        <div style="color: #ffffff; margin-bottom: 10px;">Average Load Time</div>
+                        <div style="color: #cccac2; margin-bottom: 10px;">Average Load Time</div>
                         <div style="font-size: 1.5em; font-weight: bold; color: ${
                           browser === "chromium"
                             ? "#4285f4"
                             : browser === "firefox"
                             ? "#ff9500"
-                            : "#1b1b1b"
+                            : "#707a8c"
                         };">
                             ${metrics.avgAccuracy}%
                         </div>
-                        <div style="color: #ffffff;">Sorting Accuracy</div>
+                        <div style="color: #cccac2;">Sorting Accuracy</div>
                     </div>
                 `
                   )
@@ -824,7 +825,7 @@ const generateHTMLReport = async (
                     ${
                       testResults.articles.length > 50
                         ? `
-                        <div style="margin-top: 15px; color: #6c757d; font-size: 0.9em; text-align: center;">
+                        <div style="margin-top: 15px; color: #707a8c; font-size: 0.9em; text-align: center;">
                             Showing first 50 of ${testResults.articles.length} articles
                         </div>
                     `
@@ -832,7 +833,7 @@ const generateHTMLReport = async (
                     }
                 `
                     : `
-                    <div style="color: #6c757d; text-align: center; padding: 20px;">
+                    <div style="color: #707a8c; text-align: center; padding: 20px;">
                         No articles data available
                     </div>
                 `
@@ -854,14 +855,14 @@ const generateHTMLReport = async (
                         ? "#4285f4"
                         : browser === "firefox"
                         ? "#ff9500"
-                        : "#1b1b1b"
+                        : "#707a8c"
                     };">
                         <h4 style="text-transform: uppercase; color: ${
                           browser === "chromium"
                             ? "#4285f4"
                             : browser === "firefox"
                             ? "#ff9500"
-                            : "#1b1b1b"
+                            : "#707a8c"
                         };">${browser}</h4>
                         <div class="metric">
                             <span>Avg Load Time</span>
@@ -1310,7 +1311,7 @@ const displayFinalSummary = (testResults, testStartTime) => {
   }
 
   console.log(chalk.cyan("\n📁 Reports generated in ./reports/ directory"));
-  console.log(chalk.cyan.bold("🐺 Playwright Testing Validation Complete!\n"));
+  console.log(chalk.cyan.bold("✅ Playwright Testing Validation Complete!\n"));
 
   // Return overall test status
   return failedTests === 0 && successfulTests > 0;

@@ -23,7 +23,7 @@ class TestOrchestrator {
 
   async runComprehensiveValidation(runSingleTestFn) {
     this.testStartTime = Date.now();
-    console.log(chalk.cyan.bold("\n🐺 Enhanced Hacker News Validation Suite"));
+    console.log(chalk.cyan.bold("\n🔧 Enhanced Hacker News Validation Suite"));
     console.log(chalk.cyan("=".repeat(60)));
     console.log(
       chalk.yellow(`Started: ${moment().format("YYYY-MM-DD HH:mm:ss")}`)
