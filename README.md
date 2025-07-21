@@ -1,4 +1,4 @@
-# Hacker News Sorting Validation - Enhanced Implementation
+# Hacker News Sorting Validation
 
 ![Dashboard](https://i.imgur.com/konS0UR.png)
 
